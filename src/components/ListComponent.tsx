@@ -11,9 +11,7 @@ const ListComponent = () => {
             </div>
             <div>
                 <FormComponent />
-
                 <SingleListComponent />
-
             </div>
         </div>
     )

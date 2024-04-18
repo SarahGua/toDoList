@@ -13,7 +13,7 @@ const FormComponent = () => {
                 </Form.Group>
                 
                 <div className="d-flex justify-content-center">
-                    <Button variant="primary" type="submit">
+                    <Button variant="success" type="submit">
                         Add new one
                     </Button>
                 </div>

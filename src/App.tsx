@@ -1,6 +1,4 @@
-import React from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './App.css';
+import './App.scss';
 import ListComponent from './components/ListComponent';
 import { Container } from 'react-bootstrap';
 

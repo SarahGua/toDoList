@@ -1,0 +1,9 @@
+$success: rgb(225, 47, 76);
+
+@import '~bootstrap/scss/bootstrap';
+
+$primary-color: pink;
+
+body{
+    background-color: $primary-color;
+}
