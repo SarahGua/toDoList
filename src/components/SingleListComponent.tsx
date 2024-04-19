@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Col, ListGroup, Row } from "react-bootstrap"
+import { Button, Col, ListGroup, Modal, Row, Form } from "react-bootstrap"
 import { TrashFill } from "react-bootstrap-icons";
 
 export interface Note {
@@ -16,6 +16,22 @@ export interface NoteList {
 const SingleListComponent = () => {
 
     const [notes, setNotes] = useState<NoteList>()
+
+    const [show, setShow] = useState(false);
+    const handleClose = () => setShow(false);
+    const handleShow = (note: Note) => {
+        setSelectedNote(note)
+        setUpdatedTitle(note.title)
+        setUpdatedDescription(note.description)
+        setShow(true);
+    }
+        
+
+    const [selectedNote, setSelectedNote] = useState<Note | null>(null)
+
+    const [updatedTitle, setUpdatedTitle] = useState('')
+    const [updatedDesription, setUpdatedDescription] = useState('')
+
 
     useEffect(() => {
         fetch('http://localhost:3001/notes')
@@ -51,6 +67,45 @@ const SingleListComponent = () => {
         .catch((err) => console.log(err))
     }
 
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const {name, value} = e.target
+        if(name === 'title'){
+            setUpdatedTitle(value)
+        } else if(name === 'description'){
+            setUpdatedDescription(value)
+        }
+    }
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        updateNote()
+    }
+
+    const updateNote = () => {
+        const updatedNote = {
+            ...selectedNote,
+            title: updatedTitle, 
+            description: updatedDesription
+        }
+        fetch(`http://localhost:3001/notes/${selectedNote?.ID}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedNote)
+            })
+            .then((res) => {
+                if(res.ok){
+                    handleClose()
+                    window.location.reload()
+                    return updatedNote
+                } else {
+                    throw new Error('errore nella modifica note')
+                }
+            })
+            .catch((err) => console.log(err))
+    }
+
     return (
         <div>
             <ListGroup as="ul" className="mt-5">
@@ -70,8 +125,10 @@ const SingleListComponent = () => {
                                                     <p className="m-0">{note.description}</p>
                                                 </Col>
                                                 <Col className="d-flex justify-content-around align-items-center">
-                                                    <p className="m-0">MODIFY</p>
-                                                    <TrashFill onClick={() => {
+                                                    <p className="m-0" style={{ cursor: 'pointer' }} onClick={() => handleShow(note)}>MODIFY</p>
+                                                    <TrashFill 
+                                                        style={{ cursor: 'pointer' }}
+                                                        onClick={() => {
                                                         deleteNote(note.ID) 
                                                         console.log(note.ID)
                                                         }}/>
@@ -85,6 +142,46 @@ const SingleListComponent = () => {
                     )
                 }
             </ListGroup>
+
+            <Modal
+                show={show}
+                onHide={handleClose}
+                backdrop="static"
+                keyboard={false}
+            >
+                <Modal.Header closeButton>
+                <Modal.Title>Modify your note</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={handleSubmit}>
+                        <Form.Group className="mb-3">
+                            <Form.Control 
+                            type="text" 
+                            placeholder="Title"
+                            name= 'title'
+                            value={updatedTitle}
+                            onChange={handleChange}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Control 
+                            type="text" 
+                            placeholder="Description"
+                            name= 'description'
+                            value={updatedDesription}
+                            onChange={handleChange}
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                <Button variant="secondary" onClick={handleClose}>
+                    Close
+                </Button>
+                <Button variant="primary" onClick={updateNote}>Update</Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     )
 }
